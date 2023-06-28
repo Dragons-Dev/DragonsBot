@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from src import utils
+from src import utils, db
 
 
 async def complete(ctx: discord.AutocompleteContext) -> list[str]:
@@ -38,6 +38,19 @@ class Bans(commands.Cog):
                 break
         else:
             await ctx.response.send_message(f"You are not allowed to ban", ephemeral=True)
+
+    @ban.before_invoke
+    async def is_enabled(self, ctx: discord.ApplicationContext):
+        response = await db.command_enabled(ctx.command.name, ctx.guild_id)
+        if not bool(response[0]):
+            return await ctx.response.send_message(f"This command is disabled at the moment.")
+
+    @ban.error
+    async def on_ban_error(self, ctx: discord.ApplicationContext, error: discord.ApplicationCommandError):
+        if isinstance(error, discord.ApplicationCommandInvokeError):
+            pass
+        else:
+            raise error
 
 
 def setup(client: commands.Bot):

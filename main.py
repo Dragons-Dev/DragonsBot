@@ -1,10 +1,11 @@
 import discord
 from discord.ext import commands
 
-import asyncio
 
-from src import Bot
+
+from src import Bot, db
 from settings import TOKEN
+
 
 bot = Bot.Bot(
     command_prefix=commands.when_mentioned_or(">"),
@@ -17,6 +18,12 @@ bot = Bot.Bot(
     ),
     status=discord.Status.idle,
 )
+
+
+@bot.listen("on_ready", once=True)
+async def on_ready() -> None:
+    await db.create_db()
+    bot.log.info(f"Logged in as: {bot.user.display_name}")
 
 
 bot.run(token=TOKEN)
