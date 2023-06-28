@@ -40,3 +40,30 @@ async def command_enabled(command: str, guild: int, enabled: bool = None, nuke: 
                 await cursor.execute("UPDATE commands SET enabled = ? WHERE command = ? AND guild = ?",
                                      (enabled, command, guild))
             await db.commit()
+
+
+async def get_member_cash(user: int, guild: int):
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.cursor() as cursor:
+            cursor: aiosqlite.Cursor = cursor
+            response = await cursor.execute("SELECT cash FROM economy where user = ? AND guild = ?",
+                                            (user, guild))
+            response = await response.fetchone()
+
+            if response is None:
+                await cursor.execute(
+                    "INSERT INTO economy (cash, user, guild) VALUES (?, ?, ?)",
+                    (100, user, guild))
+                await db.commit()
+                return tuple([100])
+            await db.commit()
+            return tuple(response)
+
+
+async def set_cash(cash: float, user: int, guild: int):
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.cursor() as cursor:
+            cursor: aiosqlite.Cursor = cursor
+            await cursor.execute("UPDATE economy SET cash = ? WHERE user = ? AND guild = ?",
+                                 (round(cash, 2), user, guild))
+            await db.commit()
