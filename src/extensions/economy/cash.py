@@ -123,5 +123,54 @@ class Cash(commands.Cog):
             amount=amount[0]
         ))
 
+    @commands.slash_command(name="withdraw", description="withdraw money from your bank")
+    async def withdraw(self, ctx: discord.ApplicationContext):
+        amount = await db.get_member_cash(
+            target="bank",
+            user=ctx.author.id,
+            guild=ctx.guild_id
+        )
+        await ctx.response.send_modal(CashInOutModal(
+            title="Withdraw Money",
+            target="pocket",
+            amount=amount[0]
+        ))
+
+    @commands.slash_command(name="pay", description="pay someone from your bank")
+    async def pay(self,
+                  ctx: discord.ApplicationContext,
+                  recipient: discord.Option(
+                      input_type=discord.SlashCommandOptionType.user
+                  ),
+                  amount: str):  # <@342059890187173888>
+        recipient = await utils.get_or_fetch_member(
+            member_id=int(recipient.strip("<@>")),
+            guild=ctx.guild,
+            client=self.client
+        )
+        sender = await db.get_member_cash("bank", ctx.user.id, ctx.guild_id)
+        receiver = await db.get_member_cash("bank", recipient.id, ctx.guild_id)
+
+        amount = amount.replace(",", ".")
+        try:
+            parts = amount.split(".")
+            if len(parts) > 2:
+                raise ValueError
+            if len(parts[1]) > 2:
+                raise ValueError
+            amount = int(float(amount) * 100)  # Userinput
+        except ValueError:
+            await ctx.response.send_message("Input not valid", ephemeral=True, delete_after=10)
+        except IndexError:
+            amount = int(float(amount)*100)
+
+        await db.set_member_cash("bank", sender[0] - amount, ctx.user.id, ctx.guild_id)
+        await db.set_member_cash("bank", receiver[0] + amount, recipient.id, ctx.guild_id)
+
+        await ctx.response.send_message(f"You've sent {utils.beautify_cash(amount)} CDC to {recipient.display_name}.",
+                                        ephemeral=True,
+                                        delete_after=10)
+
+
 def setup(client: commands.Bot):
     client.add_cog(Cash(client))
