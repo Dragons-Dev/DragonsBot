@@ -4,7 +4,7 @@ from discord.ext import commands
 import logging
 from pathlib import Path
 
-from src import db
+from src import assets, db
 
 
 class CustomFormatter(logging.Formatter):
@@ -37,6 +37,7 @@ class Bot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.log = log
+        self.assets = assets.Assets
         status: dict[str, Exception | bool] = self.load_extensions("src.extensions", recursive=True, store=True)
         for key, value in status.items():
             if value is True:
