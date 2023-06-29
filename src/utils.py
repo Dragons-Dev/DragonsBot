@@ -21,3 +21,9 @@ def sec_to_min(time: float):
         return f"{minutes}m {str(seconds).zfill(2)}s"
     return f"{hours}h {minutes}m {str(seconds).zfill(2)}s"
 
+
+def beautify_cash(num: int) -> str:
+    num = str(num/100).split(".")
+    if len(num[1]) == 1:
+        return f"{num[0]}.{num[1]}0"
+    return f"{num[0]}.{num[1]}"
