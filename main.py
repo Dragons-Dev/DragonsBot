@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 
 
-
 from src import Bot, db
 from settings import TOKEN
 

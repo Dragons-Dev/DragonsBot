@@ -28,7 +28,7 @@ class Crimes(commands.Cog):
         if random.randint(0, 20) == 5 or 5 == 5:
             receiver = await db.get_member_cash("pocket", ctx.user.id, ctx.guild_id)
             sender = await db.get_member_cash("pocket", user.id, ctx.guild_id)
-            amount = sender[0] * (random.randint(1, 10)/100)
+            amount = int(sender[0] * ((random.randint(1, 10))/100))
 
             await db.set_member_cash("pocket", sender[0] - amount, user.id, ctx.guild_id)
             await db.set_member_cash("pocket", receiver[0] + amount, ctx.user.id, ctx.guild_id)
@@ -43,7 +43,7 @@ class Crimes(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             cooldown = ctx.command.get_cooldown_retry_after(ctx)
             until = datetime.datetime.fromtimestamp(time.time() + cooldown)
-            await ctx.response.send_message(f"You can't rob right now, you can rob again "
+            await ctx.response.send_message(f"You can't rob right now, try again "
                                             f"{discord.utils.format_dt(until, 'R')}", ephemeral=True, delete_after=10)
         else:
             raise error
