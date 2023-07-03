@@ -17,6 +17,7 @@ class Activity(commands.Cog):
     @tasks.loop(seconds=15)
     async def active_counter(self):
         for member, guild in self.active_members.items():
+            self.client.log.debug(self.active_members)
             bank = await db.get_member_cash("pocket", member, guild)
             await db.set_member_cash("pocket", bank[0] + random.randint(1, 15), member, guild)
 
@@ -30,8 +31,15 @@ class Activity(commands.Cog):
         if after.channel is None:
             try:
                 del self.active_members[member.id]
-            except KeyError:
+            except NameError:
                 pass
+        if member.voice.self_deaf or member.voice.deaf:
+            try:
+                del self.active_members[member.id]
+            except NameError:
+                pass
+        else:
+            self.active_members[member.id] = member.guild.id
 
     @commands.Cog.listener("on_ready")
     async def scan_active(self) -> None:
@@ -41,7 +49,10 @@ class Activity(commands.Cog):
             for guild in self.client.guilds:
                 for channel in guild.voice_channels:
                     for member in channel.members:
-                        self.active_members[member.id] = guild.id
+                        if member.voice.self_deaf or member.voice.deaf:
+                            pass
+                        else:
+                            self.active_members[member.id] = guild.id
 
 
 def setup(client: commands.Bot):

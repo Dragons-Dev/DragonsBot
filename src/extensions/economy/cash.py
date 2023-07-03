@@ -81,9 +81,9 @@ class Cash(commands.Cog):
     async def daily_reward(self, ctx: discord.ApplicationContext):
         cash = await db.get_member_cash(target="pocket", user=ctx.author.id, guild=ctx.guild_id)
         cash = cash[0]
-        cash += 25
+        cash += 2500
         await db.set_member_cash(target="pocket", user=ctx.author.id, guild=ctx.guild_id, amount=cash)
-        await ctx.response.send_message(f"You now have {cash} CDC in your pocket.", ephemeral=True, delete_after=10)
+        await ctx.response.send_message(f"You now have {utils.beautify_cash(cash)} CDC in your pocket.", ephemeral=True, delete_after=10)
 
     @daily_reward.error
     async def error(self, ctx: discord.ApplicationContext, error: discord.ApplicationCommandError):
